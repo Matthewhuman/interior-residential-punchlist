@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Remodel Punchlist</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #f4f6f8;
+    }
+    h1 {
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 700px;
+      margin: 0 auto 16px auto;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #1e4fd1;
+    }
+    .task {
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+    }
+    .task:last-child {
+      border-bottom: none;
+    }
+    .task small {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Remodel Punchlist</h1>
+
+  <div class="card">
+    <h3>Add Punchlist Item</h3>
+    <input id="taskName" placeholder="Task name" />
+    <input id="room" placeholder="Room / Area" />
+    
+    <select id="priority">
+      <option value="High">High Priority</option>
+      <option value="Medium">Medium Priority</option>
+      <option value="Low">Low Priority</option>
+    </select>
+
+    <input id="responsible" placeholder="Responsible person" />
+    <input id="dueDate" type="date" />
+    <textarea id="notes" placeholder="Notes"></textarea>
+    
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <div class="card">
+    <h3>Punchlist Items</h3>
+    <div id="taskList"></div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "remodel_punchlist_tasks";
+
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+
+      tasks.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "task";
+
+        div.innerHTML = `
+          <strong>${task.name}</strong> (${task.priority})<br/>
+          <small>
+            Room: ${task.room} |
+            Responsible: ${task.responsible} |
+            Due: ${task.dueDate || "—"}
+          </small>
+          <p>${task.notes || ""}</p>
+          <button onclick="deleteTask(${index})">Delete</button>
+        `;
+
+        list.appendChild(div);
+      });
+    }
+
+    function addTask() {
+      const task = {
+        name: document.getElementById("taskName").value,
+        room: document.getElementById("room").value,
+        priority: document.getElementById("priority").value,
+        responsible: document.getElementById("responsible").value,
+        dueDate: document.getElementById("dueDate").value,
+        notes: document.getElementById("notes").value,
+      };
+
+      if (!task.name) {
+        alert("Please enter a task name.");
+        return;
+      }
+
+      const tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      tasks.push(task);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+
+      document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+      loadTasks();
+    }
+
+    function deleteTask(index) {
+      const tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      tasks.splice(index, 1);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      loadTasks();
+    }
+
+    loadTasks();
+  </script>
+</body>
+</html>
